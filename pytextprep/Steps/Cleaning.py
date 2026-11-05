@@ -1,3 +1,6 @@
+import re
+import unicodedata
+
 def lowercase(s: str) -> str:
     """
         Input: A string
@@ -41,8 +44,8 @@ def normalize_whitespace(s: str) -> str:
 def remove_urls(text: str, replace_with: str="") -> str:
     """
         Input: A text and the characters that should replaced with the text
-        Process: replace the urls with the specified characters
-        Output: the text after the replacement
+        Process: Replace the urls with the specified characters
+        Output: Text after the replacement
     """
 
     if not isinstance(text, str):
@@ -70,4 +73,59 @@ def remove_urls(text: str, replace_with: str="") -> str:
             s += text[i]
         i += 1
     return s
+
+def remove_emails(text: str, replace_with: str="") -> str:
+    """
+        Input: A text and the characters that should replaced with the text
+        Process: Replace the emails with the specified characters
+        Output: Text after the replacement
+    """
+
+    if not isinstance(text, str):
+        raise TypeError(f"expected str, got {type(text).__name__}")
+    
+    if len(text) == 0:
+        return ""
+
+    Email = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
+
+    return Email.sub(replace_with, text).strip()
+
+def remove_punctuation(text: str, keep_emojis: bool=True) -> str:
+    """
+        Input: A text and a value to know keeping the emojis or not
+        Process: Apostrophes are deleted; every other punctuation or symbol character becomes a space. Emojis survive unless keep_emojis=False
+        Output: Text after the replacement
+    """
+
+    if not isinstance(text, str):
+        raise TypeError(f"expected str, got {type(text).__name__}")
+
+    if len(text) == 0:
+        return ""
+    
+    text = text.replace("'", "")
+    s = ""
+    if keep_emojis == False:
+        for i in range(len(text)):
+            if not (text[i].isalnum() or text[i].isspace()):
+                s += " "
+            else:
+                s += text[i]
+    else:
+        for i in range(len(text)):
+            if not (text[i].isalnum() or text[i].isspace()) and unicodedata.category(text[i]) != "So":
+                s += " "
+            else:
+                s += text[i]
+    temp = s.split()
+    return(" ".join(temp))
+    
+
+        
+
+            
+
+
+    
 
