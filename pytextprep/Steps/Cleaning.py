@@ -28,9 +28,11 @@ def normalize_whitespace(s: str) -> str:
     if len(s) == 0:
             return ""
 
-    s = s.strip()
+    ans = s.strip()
     for i in range(len(s)):
-        pass
+        if s[i] < 32:
+            ans = s.replace(s[i], " ")
+             
 
 
 
