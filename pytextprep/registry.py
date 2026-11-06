@@ -4,6 +4,8 @@ STEPS = {}
 
 # Registers a function in the STEPS dictionary under the given name
 # Example: @register_step("lowercase") sets STEPS["lowercase"] = lowercase
+# @register_step("lowercase") becomes decorator = register_step("lowercase") and lowercase = decorator(lowercase)
+# we don't need @functools.wraps(func) since the we return the same function at the end
 def register_step(name):
     def decorator(func):
         STEPS[name] = func

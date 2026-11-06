@@ -2,7 +2,12 @@ import re
 import unicodedata
 from itertools import groupby
 import html
+from ..Steps import register_step
+from ..validation import requires_str
+from ..exceptions import InvalidStepParamsError
 
+@register_step("lowercase")
+@requires_str
 def lowercase(s: str) -> str:
 
     """
@@ -11,15 +16,13 @@ def lowercase(s: str) -> str:
         Output: A string with lowercase letters
     """
 
-    if not isinstance(s, str):
-        raise TypeError(f"expected str, got {type(s).__name__}")
-
     if len(s) == 0:
         return ""
 
     return s.casefold()
 
-
+@register_step("normalize_whitespace")
+@requires_str
 def normalize_whitespace(s: str) -> str:
 
     """
@@ -27,9 +30,6 @@ def normalize_whitespace(s: str) -> str:
         Process: Tabs, newlines and repeated spaces become one space; ends stripped
         Output: A string with tabs, newlines and repeated spaces replaced with a space
     """
-
-    if not isinstance(s, str):
-        raise TypeError(f"expected str, got {type(s).__name__}")
 
     if len(s) == 0:
         return ""
@@ -44,6 +44,8 @@ def normalize_whitespace(s: str) -> str:
 
     return(" ".join(temp2))
 
+@register_step("remove_urls")
+@requires_str
 def remove_urls(text: str, replace_with: str="") -> str:
 
     """
@@ -51,9 +53,6 @@ def remove_urls(text: str, replace_with: str="") -> str:
         Process: Replace the urls with the specified characters
         Output: Text after the replacement
     """
-
-    if not isinstance(text, str):
-        raise TypeError(f"expected str, got {type(text).__name__}")
 
     if len(text) == 0:
         return ""
@@ -78,6 +77,8 @@ def remove_urls(text: str, replace_with: str="") -> str:
         i += 1
     return s
 
+@register_step("remove_emails")
+@requires_str
 def remove_emails(text: str, replace_with: str="") -> str:
 
     """
@@ -85,9 +86,6 @@ def remove_emails(text: str, replace_with: str="") -> str:
         Process: Replace the emails with the specified characters
         Output: Text after the replacement
     """
-
-    if not isinstance(text, str):
-        raise TypeError(f"expected str, got {type(text).__name__}")
     
     if len(text) == 0:
         return ""
@@ -96,6 +94,8 @@ def remove_emails(text: str, replace_with: str="") -> str:
 
     return Email.sub(replace_with, text).strip()
 
+@register_step("remove_punctuation")
+@requires_str
 def remove_punctuation(text: str, keep_emojis: bool=True) -> str:
 
     """
@@ -103,9 +103,6 @@ def remove_punctuation(text: str, keep_emojis: bool=True) -> str:
         Process: Apostrophes are deleted; every other punctuation or symbol character becomes a space. Emojis survive unless keep_emojis=False
         Output: Text after the replacement
     """
-
-    if not isinstance(text, str):
-        raise TypeError(f"expected str, got {type(text).__name__}")
 
     if len(text) == 0:
         return ""
@@ -128,7 +125,9 @@ def remove_punctuation(text: str, keep_emojis: bool=True) -> str:
                 s += text[i]
     temp = s.split()
     return(" ".join(temp))
-    
+
+@register_step("normalize_repeating_chars")
+@requires_str
 def normalize_repeating_chars(text, keep=1):
 
     """
@@ -137,9 +136,6 @@ def normalize_repeating_chars(text, keep=1):
         Output: Text after the modification
     """
 
-    if not isinstance(text, str):
-        raise TypeError(f"expected str, got {type(text).__name__}")
-    
     if len(text) == 0:
         return ""
 
@@ -151,9 +147,10 @@ def normalize_repeating_chars(text, keep=1):
         else:
             ans.append(c * count)
 
-        return "".join(ans)
+    return "".join(ans)
 
-
+@register_step("remove_html")
+@requires_str
 def remove_html(text: str) -> str:
 
     """
@@ -161,9 +158,6 @@ def remove_html(text: str) -> str:
         Process: Removes tags, then decodes entities with html.unescape
         Output: string without tags and with decoded entities
     """
-
-    if not isinstance(text, str):
-        raise TypeError(f"expected str, got {type(text).__name__}")
 
     if len(text) == 0:
             return ""
@@ -174,6 +168,8 @@ def remove_html(text: str) -> str:
 
     return html.unescape(s) # -> to decode entities
 
+@register_step("remove_mentions")
+@requires_str
 def remove_mentions(text: str) -> str:
 
     """
@@ -181,9 +177,6 @@ def remove_mentions(text: str) -> str:
         Process: @user handles, but not emails
         Output: A string without mentions
     """
-
-    if not isinstance(text, str):
-            raise TypeError(f"expected str, got {type(text).__name__}")
     
     if len(text) == 0:
             return ""
@@ -192,6 +185,8 @@ def remove_mentions(text: str) -> str:
 
     return Mentions.sub("", text).strip()
 
+@register_step("remove_hashtags")
+@requires_str
 def remove_hashtags(text: str, keep_word: bool=False) -> str:
 
     """
@@ -199,9 +194,6 @@ def remove_hashtags(text: str, keep_word: bool=False) -> str:
         Process: remove the hashtags in the string with keep_word=True only the # goes
         Output: A string without hashtags
     """
-
-    if not isinstance(text, str):
-            raise TypeError(f"expected str, got {type(text).__name__}")
     
     if len(text) == 0:
             return ""
@@ -215,6 +207,8 @@ def remove_hashtags(text: str, keep_word: bool=False) -> str:
     else:
         return Hashtags.sub("", text).strip()
 
+@register_step("remove_digits")
+@requires_str
 def remove_digits(text: str) -> str:
 
     """
@@ -222,9 +216,6 @@ def remove_digits(text: str) -> str:
         Process: Removes all the digits
         Output: A string without any digits
     """
-
-    if not isinstance(text, str):
-        raise TypeError(f"expected str, got {type(text).__name__}")
     
     if len(text) == 0:
             return ""
@@ -236,6 +227,7 @@ def remove_digits(text: str) -> str:
     return Digits.sub("", text).strip()
 
 def is_emoji(char: str) -> bool:
+
     """
         Input: A string
         Process: checks the code point against the main emoji blocks (at least U+1F300 - U+1FAFF and U+2600 - U+27BF), and also drop the invisible variation selector U+FE0F and the joiner U+200D.
@@ -248,6 +240,8 @@ def is_emoji(char: str) -> bool:
     else:
         return False
 
+@register_step("handle_emojis")
+@requires_str
 def handle_emojis(text: str, mode: str="remove") -> str:
 
     """
@@ -256,11 +250,8 @@ def handle_emojis(text: str, mode: str="remove") -> str:
         Output: A string without any emojis or replaced with its Unicode name
     """
 
-    if not isinstance(text, str):
-        raise TypeError(f"expected str, got {type(text).__name__}")
-
     if mode not in ("remove", "text"):
-        raise ValueError(f"mode must be 'remove' or 'text', got {mode}")
+        raise InvalidStepParamsError(f"mode must be 'remove' or 'text', got {mode}")
     
     if len(text) == 0:
             return ""
