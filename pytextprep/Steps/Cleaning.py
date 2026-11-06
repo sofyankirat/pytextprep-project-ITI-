@@ -4,6 +4,7 @@ from itertools import groupby
 import html
 
 def lowercase(s: str) -> str:
+
     """
         Input: A string
         Process: transform the uppercase letters to the lowercase letters
@@ -44,6 +45,7 @@ def normalize_whitespace(s: str) -> str:
     return(" ".join(temp2))
 
 def remove_urls(text: str, replace_with: str="") -> str:
+
     """
         Input: A text and the characters that should replaced with the text
         Process: Replace the urls with the specified characters
@@ -77,6 +79,7 @@ def remove_urls(text: str, replace_with: str="") -> str:
     return s
 
 def remove_emails(text: str, replace_with: str="") -> str:
+
     """
         Input: A text and the characters that should replaced with the text
         Process: Replace the emails with the specified characters
@@ -94,6 +97,7 @@ def remove_emails(text: str, replace_with: str="") -> str:
     return Email.sub(replace_with, text).strip()
 
 def remove_punctuation(text: str, keep_emojis: bool=True) -> str:
+
     """
         Input: A text and a boolean value to know if the emojis will be kept
         Process: Apostrophes are deleted; every other punctuation or symbol character becomes a space. Emojis survive unless keep_emojis=False
@@ -116,6 +120,8 @@ def remove_punctuation(text: str, keep_emojis: bool=True) -> str:
                 s += text[i]
     else:
         for i in range(len(text)):
+            # So -> from the type Symbol and o is the subtype of the first type and stands for other
+            # there exist 3 other types like L -> Letter, D -> Digits, P -> Punctuation
             if not (text[i].isalnum() or text[i].isspace()) and unicodedata.category(text[i]) != "So":
                 s += " "
             else:
@@ -124,6 +130,7 @@ def remove_punctuation(text: str, keep_emojis: bool=True) -> str:
     return(" ".join(temp))
     
 def normalize_repeating_chars(text, keep=1):
+
     """
         Input: A text and the number of keeps for the repeated letters
         Process: A letter repeated 3+ times in a row is cut to keep copies; doubles such as oo in good are left alone
@@ -148,6 +155,7 @@ def normalize_repeating_chars(text, keep=1):
 
 
 def remove_html(text: str) -> str:
+
     """
         Input: A string
         Process: Removes tags, then decodes entities with html.unescape
@@ -185,6 +193,7 @@ def remove_mentions(text: str) -> str:
     return Mentions.sub("", text).strip()
 
 def remove_hashtags(text: str, keep_word: bool=False) -> str:
+
     """
         Input: A string and a boolean value to know if the word after the hashtag will be kept
         Process: remove the hashtags in the string with keep_word=True only the # goes
@@ -226,10 +235,51 @@ def remove_digits(text: str) -> str:
 
     return Digits.sub("", text).strip()
 
+def is_emoji(char: str) -> bool:
+    """
+        Input: A string
+        Process: checks the code point against the main emoji blocks (at least U+1F300 - U+1FAFF and U+2600 - U+27BF), and also drop the invisible variation selector U+FE0F and the joiner U+200D.
+        Output: A boolean value
+    """
 
+    order = ord(char) # Every character in Unicode has a number its code point and we get it with ord()
+    if order == 0xFE0F or order == 0x200D or (order >= 0x1F300 and order <= 0x1FAFF) or (order >= 0x2600 and order <= 0x27BF):
+        return True
+    else:
+        return False
 
-            
+def handle_emojis(text: str, mode: str="remove") -> str:
+
+    """
+        Input: A string and the mode used
+        Process: mode="remove" deletes emojis; mode="text" replaces each with its Unicode name from unicodedata.name, lowercased and wrapped in colons
+        Output: A string without any emojis or replaced with its Unicode name
+    """
+
+    if not isinstance(text, str):
+        raise TypeError(f"expected str, got {type(text).__name__}")
+
+    if mode not in ("remove", "text"):
+        raise ValueError(f"mode must be 'remove' or 'text', got {mode}")
+    
+    if len(text) == 0:
+            return ""
+
+    s = ""
+
+    for i in text:
+        if is_emoji(i):
+            if mode == "text" and ord(i) != 0xFE0F and ord(i) != 0x200D:
+                s += ":" + unicodedata.name(i).lower().replace(" ", "_") + ":"
+            continue
+        s += i
+
+    return " ".join(s.split())
 
 
     
+
+
+
+            
 
