@@ -68,12 +68,11 @@ def _step1a(word: str) -> str:
 
     if word.endswith("sses") or word.endswith("ies"):
         return word[:-2]
-    elif word.endwith("ss"):
+    elif word.endswith("ss"):
         return word
-    elif word.endwith("s"):
+    elif word.endswith("s"):
         return word[:-1]
     return word
-
 
 """
 
@@ -137,4 +136,62 @@ def _step1c(word: str) -> str:
 
     if word[-1] == 'y' and _has_vowel(word[:-1]):
         return word[:-1] + "i"
+    return word
+
+def _apply_rules(word: str, rules: dict, min_m: int) -> str:
+
+    """ Applies the longest matching suffix rule if the stem has m > min_m """
+
+    for suffix in sorted(rules, key=len, reverse=True):
+        if word.endswith(suffix):
+            stem = word[:-len(suffix)]
+            if _measure(stem) > min_m:
+                return stem + rules[suffix]
+            return word
+    return word
+
+def _step2(word: str) -> str:
+
+    STEP2 = {
+        "ational": "ate", "tional": "tion", "enci": "ence", "anci": "ance",
+        "izer": "ize", "abli": "able", "alli": "al", "entli": "ent",
+        "eli": "e", "ousli": "ous", "ization": "ize", "ation": "ate",
+        "ator": "ate", "alism": "al", "iveness": "ive", "fulness": "ful",
+        "ousness": "ous", "aliti": "al", "iviti": "ive", "biliti": "ble",
+    }
+
+    # EX: Relational --> Relate
+    
+    return _apply_rules(word, STEP2, 0)
+
+def _step3(word: str) -> str:
+
+    STEP3 = {
+        "icate": "ic", "ative": "", "alize": "al", "iciti": "ic",
+        "ical": "ic", "ful": "", "ness": "",
+    }
+
+    # EX: happiness --> happi
+
+    return _apply_rules(word, STEP3, 0)
+
+def _step4(word: str) -> str:
+
+    STEP4 = (
+        "al", "ance", "ence", "er", "ic", "able", "ible", "ant", "ement",
+        "ment", "ent", "ion", "ou", "ism", "ate", "iti", "ous", "ive", "ize"
+    )
+
+    for suffix in sorted(STEP4, key=len, reverse=True):
+        if word.endswith(suffix):
+            stem = word[:-len(suffix)]
+            if _measure(stem) > 1:
+                # stem[-1] IndexError: string index out of range if the stem is empty and stem[-1:] return empty string
+                if suffix == "ion" and stem[-1:] not in ("t", "s"):
+                    return word
+                return stem
+            return word
+
+    # EX: adjustment --> adjust and region --> region since m = 1 not bigger than 1
+    
     return word
