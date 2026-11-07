@@ -195,3 +195,51 @@ def _step4(word: str) -> str:
     # EX: adjustment --> adjust and region --> region since m = 1 not bigger than 1
     
     return word
+
+"""
+
+STEP 5a:
+
+    - if the word ends with e, look at the stem (the word without the final e)
+    - if m > 1 in the stem --> remove the e
+        EX: probate -> probat
+    - if m = 1 and the stem does not end with CVC --> remove the e
+        EX: cease -> ceas
+    - if m = 1 and the stem ends with CVC --> keep the e
+        EX: rate -> rate (removing it would give rat, a different word)
+    - if m = 0 --> nothing changed
+        EX: the -> the
+
+"""
+
+def _step5a(word: str) -> str:
+
+    """ Returns the word after removing the final e if the stem is long enough (m > 1) or if m = 1 and the stem doesn't end with CVC """
+
+    if word.endswith("e"):
+        stem = word[:-1]
+        if _measure(stem) > 1 or (_measure(stem) == 1 and not _ends_cvc(stem)):
+            return stem
+    return word
+
+"""
+
+STEP 5b:
+
+    - if m > 1 and the word ends with ll --> remove one l
+        EX: controll -> control
+    - if m <= 1 --> nothing changed
+        EX: roll -> roll and fall -> fall
+    - m is measured on the whole word (including the ll), not on the stem
+
+"""
+
+def _step5b(word: str) -> str:
+
+    """ Returns the word after removing one l from a final double l if m > 1 """
+
+    if word.endswith("ll") and _measure(word) > 1:
+        return word[:-1]
+    return word
+
+
