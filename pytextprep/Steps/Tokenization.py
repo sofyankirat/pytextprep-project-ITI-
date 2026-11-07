@@ -1,5 +1,6 @@
 import re
-from ..Steps import register_step
+from importlib import resources
+from ..registry import register_step
 from ..validation import requires_str
 
 @register_step("word_tokenize")
@@ -51,4 +52,88 @@ def sent_tokenize(text: str) -> list:
 
     return sentences
 
+def _load_stopwords():
+
+    """ Load the stopwords from stopwords_en.txt as a set """
+
+    path = resources.files("pytextprep").joinpath("resources", "stopwords_en.txt")
+    text = path.read_text(encoding="utf-8")
     
+    words = set()
+    for w in text.splitlines():
+        w = w.strip()
+        if w:
+            words.add(w.lower())
+
+    return words
+
+@register_step("remove_stopwords")
+@requires_str
+def remove_stopwords(text: str, custom_words: list=None, extra_only: bool=False) -> str:
+
+    """
+        Input: A string and the list of the custom words if it exists and a boolean value that determines what is the lists that we will work on
+        Process: Case-insensitive. Uses the built-in English list plus custom_words; extra_only=True uses only the custom list. Keeps negations (not, no, nor) because they flip meaning
+        Output: A string without the stopwords
+    """
+
+    message = text.split()
+    ans = []
+    words = set()
+    if extra_only == False:
+        words = _load_stopwords()
+    if custom_words and extra_only == False:
+        custom_words = {w.lower() for w in custom_words}
+        words = words | set(custom_words)
+    elif custom_words and extra_only == True:
+        custom_words = {w.lower() for w in custom_words}
+        words = set(custom_words)
+    for i in message:
+        if i.lower() not in words:
+            ans.append(i)
+
+    return " ".join(ans)
+
+def _load_contractions():
+
+    """ Load the contractions from contractions_en.tsv as a dictionary """
+    path = resources.files("pytextprep").joinpath("resources", "contractions_en.tsv")
+    text = path.read_text(encoding="utf-8")
+
+    table = {}
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        key, value = line.split(None, 1) # split on any whitespace (space or tabs) once
+        table[key.strip().lower()] = value.strip()
+    return table
+
+
+@register_step("expand_contractions")
+@requires_str
+def expand_contractions(text: str) -> str:
+
+    """
+        Input: A string
+        Process: Table-driven; handles ' and the curly ’; keeps the capital of the first letter
+        Output: A string with contractions expanded
+    """
+
+    Punct = ".,!?;:\"()[]{}"
+    message = text.replace("’", "'")
+    table = _load_contractions()
+    result = []
+
+    for word in message.split():
+        core = word.strip(Punct)
+        key = core.lower()
+
+        if key in table:
+            extend = table[key]
+            if core[0].isupper():
+                extend = extend[0].upper() + extend[1:]
+            word = word.replace(core, extend)
+
+        result.append(word)
+
+    return " ".join(result)

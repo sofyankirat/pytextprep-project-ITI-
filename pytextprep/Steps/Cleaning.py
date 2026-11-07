@@ -2,7 +2,7 @@ import re
 import unicodedata
 from itertools import groupby
 import html
-from ..Steps import register_step
+from ..registry import register_step
 from ..validation import requires_str
 from ..exceptions import InvalidStepParamsError
 
@@ -266,11 +266,3 @@ def handle_emojis(text: str, mode: str="remove") -> str:
         s += i
 
     return " ".join(s.split())
-
-
-    
-
-
-
-            
-
