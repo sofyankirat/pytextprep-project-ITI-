@@ -1,3 +1,4 @@
+import difflib
 from .exceptions import UnknownStepError
 
 STEPS = {}
@@ -16,7 +17,11 @@ def register_step(name):
 # Raises UnknownStepError if the name is not registered
 def get_step(name):
     if name not in STEPS:
-        raise UnknownStepError(f"{name!r} is not a step.")
+        message = f"{name!r} is not a step."
+        close = difflib.get_close_matches(name, STEPS, n=1)
+        if close:
+            message += f" Did you mean {close[0]!r}?"
+        raise UnknownStepError(message)
     return STEPS[name]
 
 # Returns the names of all registered steps, sorted alphabetically
