@@ -1,3 +1,6 @@
+from ..registry import register_step
+from ..validation import requires_str 
+
 def _is_consonant(word: str, i: int) -> bool:
 
     """ Returns True if the character is consonant and False otherwise """
@@ -242,4 +245,48 @@ def _step5b(word: str) -> str:
         return word[:-1]
     return word
 
+"""
 
+STEP 6: Combine all the steps for a single word
+
+    - lowercase the word first (the rules only work on lowercase letters)
+    - if the word has 2 letters or fewer --> return it without stemming
+        EX: at -> at
+    - apply the steps in order: 1a, 1b, 1c, 2, 3, 4, 5a, 5b
+      (each step works on the output of the previous one)
+    - if the original word started with a capital letter --> capitalize the result
+        EX: Running -> Run and running -> run
+        EX: relational -> relat and generalization -> gener
+
+"""
+
+def _stem_word(word: str) -> str:
+
+    """ Returns the Porter stem of a single word and keeps the capital of its first letter """
+
+    original = word
+    word = word.lower()
+
+    if len(word) <= 2:
+        return word
+
+    word = _step1a(word)
+    word = _step1b(word)
+    word = _step1c(word)
+    word = _step2(word)
+    word = _step3(word)
+    word = _step4(word)
+    word = _step5a(word)
+    word = _step5b(word)
+
+    if original[0].isupper():
+        word = word[0].upper() + word[1:]
+
+    return word
+
+
+@register_step("stem")
+@requires_str
+def stem(text: str) -> str:
+    """ Applies the Porter stemmer on every word in the text """
+    return " ".join(_stem_word(w) for w in text.split())
