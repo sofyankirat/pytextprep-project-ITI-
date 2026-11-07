@@ -86,8 +86,11 @@ STEP 1b:
 
     If ed or ing was removed, fix the stem:
         - if it ends with at, bl or iz --> add e
+            EX: troubled -> troubl -> trouble and realizing -> realiz -> realize
         - if it ends with a double consonant (not l, s or z) --> remove one letter
+            Ex: planned -> plann -> plan and getting -> gett -> get and falling -> fall -> fall since the last letter is l
         - if m = 1 and it ends with CVC (cvc where the last is not w, x or y) --> add e
+            Ex: hiding -> hid -> hide and caring -> car -> care
 
 """
 
@@ -116,4 +119,22 @@ def _step1b(word: str) -> str:
         elif _measure(word) == 1 and _ends_cvc(word):
             return word + "e"
 
+    return word
+
+"""
+
+STEP 1c:
+
+    - if the word ends with y and the stem has a vowel --> y becomes i
+    - if the stem has no vowel --> nothing changed
+        Ex: happy -> happi to match happiness -> happi and sky -> sky since the stem don't have a vowel
+
+"""
+
+def _step1c(word: str) -> str:
+
+    """ Return a string after change the last letter if it 'y' to 'i' and nothing happened otherwise """
+
+    if word[-1] == 'y' and _has_vowel(word[:-1]):
+        return word[:-1] + "i"
     return word
