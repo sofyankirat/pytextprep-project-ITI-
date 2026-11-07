@@ -3,7 +3,6 @@ from importlib import resources
 from ..registry import register_step
 from ..validation import requires_str
 
-@register_step("word_tokenize")
 @requires_str
 def word_tokenize(text: str) -> list:
 
@@ -16,7 +15,6 @@ def word_tokenize(text: str) -> list:
     Word_Token = re.compile(r"[^\W_]+(?:['-][^\W_]+)*")
     return Word_Token.findall(text)
 
-@register_step("sent_tokenize")
 @requires_str
 def sent_tokenize(text: str) -> list:
 
