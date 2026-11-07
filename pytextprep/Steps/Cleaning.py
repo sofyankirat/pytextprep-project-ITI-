@@ -92,7 +92,7 @@ def remove_emails(text: str, replace_with: str="") -> str:
 
     Email = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
 
-    return Email.sub(replace_with, text).strip()
+    return " ".join(Email.sub(replace_with, text).split())
 
 @register_step("remove_punctuation")
 @requires_str
@@ -226,7 +226,7 @@ def remove_digits(text: str) -> str:
 
     return Digits.sub("", text).strip()
 
-def is_emoji(char: str) -> bool:
+def _is_emoji(char: str) -> bool:
 
     """
         Input: A string
@@ -259,7 +259,7 @@ def handle_emojis(text: str, mode: str="remove") -> str:
     s = ""
 
     for i in text:
-        if is_emoji(i):
+        if _is_emoji(i):
             if mode == "text" and ord(i) != 0xFE0F and ord(i) != 0x200D:
                 s += ":" + unicodedata.name(i).lower().replace(" ", "_") + ":"
             continue

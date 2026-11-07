@@ -18,6 +18,8 @@ class Pipeline:
         return [(name, params) for name, _, params in self._steps]
 
     def transform(self, text, return_tokens=False):
+        if not isinstance(text, str):
+            raise TypeError(f"expected str, got {type(text).__name__}")
         for _, func, params in self._steps:
             text = func(text, **params)
         if return_tokens:
