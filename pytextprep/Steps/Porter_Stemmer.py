@@ -62,3 +62,14 @@ STEP 1a:
 
 """
 
+def _step1a(word: str) -> str:
+
+    """ Returns the word after removing the letters that responsible for plural """
+
+    if word.endswith("sses") or word.endswith("ies"):
+        return word[:-2]
+    elif word.endwith("ss"):
+        return word
+    elif word.endwith("s"):
+        return word[:-1]
+    return word
