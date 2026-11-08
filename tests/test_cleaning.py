@@ -1,4 +1,5 @@
 import unittest
+from pytextprep.exceptions import InvalidStepParamsError
 
 from pytextprep.Steps.Cleaning import (
     lowercase, normalize_whitespace, remove_urls, remove_emails,
@@ -54,6 +55,35 @@ class TestCleaning(unittest.TestCase):
     def test_normalize_whitespace(self):
         self.assertEqual(normalize_whitespace("  a\t\tb\n c "), "a b c")
 
+class TestMoreCleaning(unittest.TestCase):
+
+    def test_remove_html(self):
+        self.assertEqual(remove_html("<p>Hi &amp; bye</p>"), "Hi & bye")
+
+    def test_remove_mentions(self):
+        self.assertEqual(remove_mentions("@ali hello"), "hello")
+
+    def test_remove_mentions_keeps_emails(self):
+        text = "write ali@iti.gov.eg"
+        self.assertEqual(remove_mentions(text), text)
+
+    def test_remove_hashtags(self):
+        self.assertEqual(remove_hashtags("love #python"), "love")
+        self.assertEqual(remove_hashtags("love #python", keep_word=True), "love python")
+
+    def test_remove_digits(self):
+        self.assertEqual(remove_digits("room 42"), "room")
+
+    def test_handle_emojis(self):
+        self.assertEqual(handle_emojis("hi 😊"), "hi")
+        self.assertEqual(
+            handle_emojis("hi 😊", mode="text"),
+            "hi :smiling_face_with_smiling_eyes:",
+        )
+
+    def test_handle_emojis_bad_mode(self):
+        with self.assertRaises(InvalidStepParamsError):
+            handle_emojis("hi", mode="wrong")
 
 if __name__ == "__main__":
     unittest.main()
